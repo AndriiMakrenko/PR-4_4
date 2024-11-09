@@ -96,3 +96,54 @@ label span {
     -webkit-text-stroke-width: 2px;
     -webkit-text-stroke-color: black; 
 }
+
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes modalFadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+}
+
+
+.modal-dialog {
+    animation: modalFadeIn 0.5s ease forwards;
+}
+
+.modal.fade-out .modal-dialog {
+    animation: modalFadeOut 0.5s ease forwards;
+}
+
+
+.answers-item {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.answers-item:hover {
+    transform: scale(1.05);
+}
+
+
+button {
+    transition: background-color 0.3s ease, transform 0.3s ease;
+}
+
+button:hover {
+    background-color: #ff6f61;
+    transform: scale(1.05);
+}

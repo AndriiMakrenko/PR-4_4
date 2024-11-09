@@ -4,10 +4,12 @@ document.addEventListener('DOMContentLoaded', function () {
     const closeModal = document.querySelector('#closeModal');
     const questionTitle = document.querySelector('#question');
     const formAnswers = document.querySelector('#formAnswers');
-    const prevButton = document.querySelector('#prev');
     const nextButton = document.querySelector('#next');
+    const prevButton = document.querySelector('#prev');
     const sendButton = document.querySelector('#send');
     let numberQuestion = 0;
+    const finalAnswers = [];
+    let testCompleted = false; 
 
     const questions = [
         {
@@ -49,13 +51,12 @@ document.addEventListener('DOMContentLoaded', function () {
     ];
 
     const renderAnswers = (index) => {
-        formAnswers.innerHTML = ''; // Clear previous answers
-
+        formAnswers.innerHTML = '';
         questions[index].answers.forEach((answer) => {
             const answerItem = document.createElement('div');
             answerItem.classList.add('answers-item', 'd-flex', 'justify-content-center');
             answerItem.innerHTML = `
-                <input type="${questions[index].type}" id="${answer.title}" name="answer" class="d-none">
+                <input type="${questions[index].type}" id="${answer.title}" name="answer" class="d-none" value="${answer.title}">
                 <label for="${answer.title}" class="d-flex flex-column justify-content-between">
                     <img class="answerImg" src="${answer.url}" alt="burger">
                     <span>${answer.title}</span>
@@ -66,54 +67,97 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     const renderQuestions = (indexQuestion) => {
-        if (numberQuestion === 0) {
-            prevButton.classList.add('d-none');
-        } else {
-            prevButton.classList.remove('d-none');
-        }
+        formAnswers.innerHTML = '';
+        
+        switch (true) {
+            case (numberQuestion >= 0 && numberQuestion < questions.length):
+                questionTitle.textContent = questions[indexQuestion].question;
+                renderAnswers(indexQuestion);
+                nextButton.classList.remove('d-none');
+                prevButton.classList.remove('d-none');
+                sendButton.classList.add('d-none');
+                if (numberQuestion === 0) prevButton.classList.add('d-none');
+                break;
+            
+            case (numberQuestion === questions.length):
+                questionTitle.textContent = '';
+                formAnswers.innerHTML = ` 
+                    <div class="form-group">
+                        <label for="numberPhone">Введіть свій номер телефону</label>
+                        <input type="phone" class="form-control" id="numberPhone">
+                    </div>
+                `;
+                nextButton.classList.add('d-none');
+                prevButton.classList.add('d-none');
+                sendButton.classList.remove('d-none');
+                break;
+            
+            case (numberQuestion === questions.length + 1):
+                formAnswers.innerHTML = `
+                    <p>Дякуємо за проходження тесту!</p>
+                    <p>Бажаєте пройти тест ще раз?</p>
+                    <button class="btn btn-primary" id="restartYes">Так</button>
+                    <button class="btn btn-secondary" id="restartNo">Ні</button>
+                `;
+                
+                document.querySelector('#restartYes').addEventListener('click', () => {
+                    finalAnswers.length = 0; 
+                    location.reload();
+                });
 
-        if (numberQuestion === questions.length - 1) {
-            nextButton.classList.add('d-none');
-            sendButton.classList.remove('d-none');
-        } else {
-            nextButton.classList.remove('d-none');
-            sendButton.classList.add('d-none');
+                document.querySelector('#restartNo').addEventListener('click', () => {
+                    modalBlock.classList.add('fade-out');
+                    setTimeout(() => modalBlock.classList.remove('d-block'), 500);
+                    testCompleted = true; 
+                });
+                break;
         }
+    };
 
-        questionTitle.textContent = questions[indexQuestion].question;
-        renderAnswers(indexQuestion);
+    const checkAnswer = () => {
+        const obj = {};
+        const inputs = [...formAnswers.elements].filter((input) => input.checked || input.id === 'numberPhone');
+        inputs.forEach((input, index) => {
+            if (numberQuestion >= 0 && numberQuestion < questions.length) {
+                obj[`${index}_${questions[numberQuestion].question}`] = input.value;
+            }
+            if (numberQuestion === questions.length) {
+                obj['Номер телефону'] = input.value;
+            }
+        });
+        finalAnswers.push(obj);
+        console.log(finalAnswers);  // Вывод ответа в консоль
+    };
+
+    nextButton.onclick = () => {
+        checkAnswer();
+        numberQuestion++;
+        renderQuestions(numberQuestion);
+    };
+
+    prevButton.onclick = () => {
+        numberQuestion--;
+        renderQuestions(numberQuestion);
+    };
+
+    sendButton.onclick = () => {
+        checkAnswer();
+        numberQuestion++;
+        renderQuestions(numberQuestion);
     };
 
     btnOpenModal.addEventListener('click', () => {
-        modalBlock.classList.add('d-block');
-        renderQuestions(numberQuestion);
+        if (testCompleted) { 
+            alert("Ви вже пройшли тест, дякуємо за відповідь");
+        } else {
+            modalBlock.classList.add('d-block');
+            modalBlock.classList.remove('fade-out');
+            renderQuestions(numberQuestion);
+        }
     });
 
     closeModal.addEventListener('click', () => {
-        modalBlock.classList.remove('d-block');
+        modalBlock.classList.add('fade-out');
+        setTimeout(() => modalBlock.classList.remove('d-block'), 500); 
     });
-
-    prevButton.addEventListener('click', () => {
-        if (numberQuestion > 0) {
-            numberQuestion--;
-            renderQuestions(numberQuestion);
-        }
-    });
-
-    nextButton.addEventListener('click', () => {
-        if (numberQuestion < questions.length - 1) {
-            numberQuestion++;
-            renderQuestions(numberQuestion);
-        }
-    });
-
-    sendButton.addEventListener('click', () => {
-        alert("Тест завершено! Дякуємо за вашу відповідь)");
-        modalBlock.classList.remove('d-block');
-    
-        
-        setTimeout(() => {
-            location.reload(); 
-        }, 1000); 
-    });
-});  
+});
