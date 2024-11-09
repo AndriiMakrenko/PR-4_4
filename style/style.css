@@ -62,9 +62,6 @@ label span {
 
 .modal-content {
     background: #E0FFFF;
-    /* color: #3CB371; */
-    /* -webkit-text-stroke-width: 1px; */
-    /* -webkit-text-stroke-color: black;  */
 }
 
 .btn-outline-danger {
@@ -146,4 +143,9 @@ button {
 button:hover {
     background-color: #ff6f61;
     transform: scale(1.05);
+}
+
+#modalBlock {
+    opacity: 0;
+    transition: opacity 0.5s ease;
 }
